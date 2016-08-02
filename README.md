@@ -2,19 +2,19 @@ Create a virtual environment:
 -----------------------------
 
 ```python
-cd ~/path/to/etsysell/
-virtualenv -p python3 etsysell-env
-source etsysell-env/bin/activate
+cd ~/path/to/inventory/
+virtualenv -p python3 inventory-env
+source inventory-env/bin/activate
 ```
 
 To run locally:
 ---------------
 
 ```python
-cd ~/path/to/etsysell/
-source etsysell-env/bin/activate
+cd ~/path/to/inventory/
+source inventory-env/bin/activate
 pip install -r requirements.txt
-cd etsysell
+cd inventory
 python3 manage.py migrate
 python3 manage.py runserver
 ```
@@ -23,7 +23,7 @@ To create a superuser (for admin access):
 -----------------------------------------
 
 ```python
-cd ~/path/to/etsysell/etsysell/
+cd ~/path/to/inventory/inventory/
 python3 manage.py createsuperuser
 ```
 
