@@ -18,5 +18,5 @@ class SellerAccount(models.Model):
     created_date = models.DateTimeField(auto_now = True)
 
     def __str__(self):
-        return "SellerAccount: %s - %s" % (self.market.name, self.username)
+        return "%s" % (self.username)
 

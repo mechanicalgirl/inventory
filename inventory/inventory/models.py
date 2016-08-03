@@ -4,7 +4,8 @@ from seller_accounts.models import SellerAccount
 
 class Category(models.Model):
     """
-    Seller's shop categories (as opposed to market's item type categories)
+    Seller's customizable shop categories
+    (as opposed to market's fixed category list)
     """
     name = models.CharField(max_length=60)
     active = models.BooleanField(default=True)
@@ -17,6 +18,43 @@ class Category(models.Model):
         verbose_name_plural = "categories"
 
 class Item(models.Model):
+    account = models.ForeignKey(SellerAccount)
+    title = models.CharField(max_length=50)
+    price = models.DecimalField(max_digits=15, decimal_places=2)
+    quantity = models.IntegerField()
+    description = models.TextField()
+    dimensions = models.TextField(blank=True, null=True)
+    tags = models.TextField(help_text="Comma-separated words or phrases")
+    date_listed = models.DateTimeField(blank=True, null=True)
+    final_url = models.CharField(max_length=200, blank=True, null=True)
+    active = models.BooleanField(default=False)
+    created_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "Item: %s" % (self.title)
+
+    def which_market(self):
+        return self.account.market
+
+    def extra_fields_by_market(self):
+        extra_model = ''
+        if self.account.market:
+            extra_model = str(self.account.market)+'ItemInline'
+        return extra_model
+
+class ItemCategory(models.Model):
+    item = models.ForeignKey(Item)
+    category = models.ForeignKey(Category)
+
+    class Meta:
+        verbose_name_plural = "item categories"
+
+class EtsyItem(models.Model):
+    """
+    Fields required when the item is listed
+    on the market 'Etsy'
+    """
+
     ETSY_WHO_MADE_IT_CHOICES = (
         ('i_did', 'I did'),
         ('collective', 'A member of my shop'),
@@ -48,18 +86,8 @@ class Item(models.Model):
         ('1900s', '1900 - 1909'),
     )
 
-    account = models.ForeignKey(SellerAccount)
-    title = models.CharField(max_length=50)
-    price = models.DecimalField(max_digits=15, decimal_places=2)
-    quantity = models.IntegerField()
-    description = models.TextField()
-    dimensions = models.TextField()
-    tags = models.TextField(help_text="Comma-separated words")
-    materials = models.TextField(help_text="Comma-separated words")
-    final_url = models.CharField(max_length=200, blank=True, null=True)
-    active = models.BooleanField(default=False)
-    created_date = models.DateTimeField(auto_now = True)
-
+    item = models.ForeignKey(Item)
+    materials = models.TextField(help_text="Comma-separated words or phrases")
     etsy_who_made_it = models.CharField(
         max_length=12,
         choices=ETSY_WHO_MADE_IT_CHOICES,
@@ -77,7 +105,7 @@ class Item(models.Model):
     )
 
     """
-    All the Etsy fields will be needed if we're going
+    Additional Etsy fields will be needed if we're going
     to use this app to post items using the API.
 
     etsy_category/sub-categories
@@ -85,13 +113,3 @@ class Item(models.Model):
     etsy_occasion =
     etsy_style =
     """
-
-    def __str__(self):
-        return "Item: %s" % (self.title)
-
-class ItemCategory(models.Model):
-    item = models.ForeignKey(Item)
-    category = models.ForeignKey(Category)
-
-    class Meta:
-        verbose_name_plural = "item categories"
