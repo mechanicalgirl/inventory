@@ -21,10 +21,10 @@ class Item(models.Model):
         return self.account.market
 
     def extra_fields_by_market(self):
-        extra_model = ''
+        extra_inline_model = ''
         if self.account.market:
-            extra_model = str(self.account.market)+'ItemInline'
-        return extra_model
+            extra_inline_model = str(self.account.market)+'ItemInline'
+        return extra_inline_model
 
 class EtsyItem(models.Model):
     """
@@ -92,6 +92,14 @@ class EtsyItem(models.Model):
     etsy_style =
     """
 
+    class Meta:
+        verbose_name = 'Etsy Data'
+        verbose_name_plural = 'Etsy Data'
+    
+    def __str__(self):
+        return "Item %s" % (self.item.id)
+
+
 class SpoonflowerItem(models.Model):
     """
     Fields required when the item is listed
@@ -129,3 +137,10 @@ class SpoonflowerItem(models.Model):
     design_height = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text="In inches")
     dpi = models.IntegerField(blank=True, null=True, default=150)
     additional_details = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Spoonflower Data'
+        verbose_name_plural = 'Spoonflower Data'
+
+    def __str__(self):
+        return "Item %s" % (self.item.id)
