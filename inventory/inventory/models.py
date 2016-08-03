@@ -2,28 +2,12 @@ from django.db import models
 
 from seller_accounts.models import SellerAccount
 
-class Category(models.Model):
-    """
-    Seller's customizable shop categories
-    (as opposed to market's fixed category list)
-    """
-    name = models.CharField(max_length=60)
-    active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return u"%s" % self.name
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name_plural = "categories"
-
 class Item(models.Model):
     account = models.ForeignKey(SellerAccount)
-    title = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=15, decimal_places=2)
     quantity = models.IntegerField()
     description = models.TextField()
-    dimensions = models.TextField(blank=True, null=True)
     tags = models.TextField(help_text="Comma-separated words or phrases")
     date_listed = models.DateTimeField(blank=True, null=True)
     final_url = models.CharField(max_length=200, blank=True, null=True)
@@ -31,7 +15,7 @@ class Item(models.Model):
     created_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "Item: %s" % (self.title)
+        return "Item: %s" % (self.name)
 
     def which_market(self):
         return self.account.market
@@ -41,13 +25,6 @@ class Item(models.Model):
         if self.account.market:
             extra_model = str(self.account.market)+'ItemInline'
         return extra_model
-
-class ItemCategory(models.Model):
-    item = models.ForeignKey(Item)
-    category = models.ForeignKey(Category)
-
-    class Meta:
-        verbose_name_plural = "item categories"
 
 class EtsyItem(models.Model):
     """
@@ -103,9 +80,10 @@ class EtsyItem(models.Model):
         choices=ETSY_WHEN_WAS_IT_MADE_CHOICES,
         default='2010_2016'
     )
+    category_name = models.CharField(max_length=60, blank=True, null=True, help_text='Your store category')
 
     """
-    Additional Etsy fields will be needed if we're going
+    These additional Etsy fields will be needed if we're going
     to use this app to post items using the API.
 
     etsy_category/sub-categories
@@ -113,3 +91,41 @@ class EtsyItem(models.Model):
     etsy_occasion =
     etsy_style =
     """
+
+class SpoonflowerItem(models.Model):
+    """
+    Fields required when the item is listed
+    on the market 'Spoonflower'
+    """
+    item = models.ForeignKey(Item)
+    base_image_name = models.CharField(max_length=200)
+
+    SPOONFLOWER_MATERIAL_CHOICES = (
+        ('fabric', 'Fabric'),
+        ('wallpaper', 'Wallpaper'),
+        ('giftwrap', 'Gift Wrap'),
+    )
+    material_type = models.CharField(
+        max_length=10,
+        choices=SPOONFLOWER_MATERIAL_CHOICES,
+        default='fabric',
+    )
+
+    SPOONFLOWER_REPEAT_CHOICES = (
+        ('basic', 'Basic'),
+        ('halfdrop', 'Half-Drop'),    # not available for wallpaper
+        ('halfbrick', 'Half-Brick'),  # not available for wallpaper
+        ('center', 'Center'),         # not available for wallpaper
+        ('mirror', 'Mirror'),         # not available for wallpaper
+    )
+    repeat_type = models.CharField(
+        max_length=10,
+        choices=SPOONFLOWER_REPEAT_CHOICES,
+        default='basic',
+        help_text="'Basic' is the only option available for wallpaper."
+    )
+
+    design_width = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text="In inches")
+    design_height = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text="In inches")
+    dpi = models.IntegerField(blank=True, null=True, default=150)
+    additional_details = models.TextField(blank=True, null=True)

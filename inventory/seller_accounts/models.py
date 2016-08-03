@@ -1,15 +1,17 @@
 from django.db import models
 
-class Market(models.Model):
-    name = models.CharField(max_length=200)
-    url = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return "%s" % (self.name)
-
 class SellerAccount(models.Model):
-    market = models.ForeignKey(Market)
+    MARKET_NAME_CHOICES = (
+        ('Etsy', 'Etsy'),
+        ('Artfire', 'ArtFire'),
+        ('Handmadeatamazon', 'Handmade at Amazon'),
+        ('Spoonflower', 'Spoonflower'),
+    )
+    market = models.CharField(
+        max_length=200,
+        choices=MARKET_NAME_CHOICES,
+        default='Etsy',
+    )
     username = models.CharField(max_length=50)
     password = models.CharField(max_length=50, blank=True, null=True)  # optional
     shop_name = models.CharField(max_length=50, blank=True, null=True)
@@ -18,5 +20,5 @@ class SellerAccount(models.Model):
     created_date = models.DateTimeField(auto_now = True)
 
     def __str__(self):
-        return "%s" % (self.username)
+        return "%s : %s" % (self.market, self.username)
 
