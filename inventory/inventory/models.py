@@ -1,11 +1,14 @@
 from django.db import models
 
 from seller_accounts.models import SellerAccount
+from supplies.models import Supply
+
 
 class Item(models.Model):
     account = models.ForeignKey(SellerAccount)
     name = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=15, decimal_places=2)
+    min_cost = models.FloatField(verbose_name="Minimum Cost", blank=True, null=True)
     quantity = models.IntegerField()
     description = models.TextField()
     tags = models.TextField(help_text="Comma-separated words or phrases")
@@ -25,6 +28,21 @@ class Item(models.Model):
         if self.account.market:
             extra_inline_model = str(self.account.market)+'ItemInline'
         return extra_inline_model
+
+class ItemSupply(models.Model):
+    """
+    """
+    item = models.ForeignKey(Item)
+    supply = models.ForeignKey(Supply)
+    quantity = models.IntegerField(help_text="Number of individual units used in item")
+
+    def __str__(self):
+        return "%s" % (self.supply.name)
+
+    class Meta:
+        verbose_name = 'Supplies Per Item'
+        verbose_name_plural = 'Supplies Per Item'
+        unique_together = ('item', 'supply')
 
 class EtsyItem(models.Model):
     """
